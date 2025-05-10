@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Portfolio Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Projects</h5>
+                <p class="card-text">Manage your portfolio projects</p>
+                <a href="/admin/projects" class="btn btn-primary">View Projects</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Experiences</h5>
+                <p class="card-text">Manage your work experiences</p>
+                <a href="/admin/experiences" class="btn btn-primary">View Experiences</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Personal Data</h5>
+                <p class="card-text">Manage your personal information</p>
+                <a href="/admin/personal" class="btn btn-primary">View Personal Data</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

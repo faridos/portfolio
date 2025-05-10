@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Personal Data - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="h2 mb-4">Personal Data</h1>
+    
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form id="personalDataForm">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" id="name" name="name" class="form-control">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" id="title" name="title" class="form-control">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" id="email" name="email" class="form-control">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="tel" id="phone" name="phone" class="form-control">
+                    </div>
+
+                    <div class="col-12">
+                        <label for="location" class="form-label">Location</label>
+                        <input type="text" id="location" name="location" class="form-control">
+                    </div>
+
+                    <div class="col-12">
+                        <label for="bio" class="form-label">Bio</label>
+                        <textarea id="bio" name="bio" rows="4" class="form-control"></textarea>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="skills" class="form-label">Skills (comma-separated)</label>
+                        <input type="text" id="skills" name="skills" class="form-control">
+                    </div>
+
+                    <div class="col-12">
+                        <label for="social_links" class="form-label">Social Links (JSON)</label>
+                        <textarea id="social_links" name="social_links" rows="4" class="form-control font-monospace"></textarea>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const form = document.getElementById('personalDataForm');
+    
+    // Fetch existing data
+    try {
+        const response = await fetch('/api/admin/personal');
+        if (response.ok) {
+            const data = await response.json();
+            if (data) {
+                // Populate form fields
+                Object.keys(data).forEach(key => {
+                    const input = form.elements[key];
+                    if (input) {
+                        if (key === 'social_links') {
+                            input.value = JSON.stringify(data[key], null, 2);
+                        } else if (key === 'skills') {
+                            input.value = data[key].join(', ');
+                        } else {
+                            input.value = data[key];
+                        }
+                    }
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching personal data:', error);
+    }
+
+    // Handle form submission
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const data = {};
+        
+        for (const [key, value] of formData.entries()) {
+            if (key === 'social_links') {
+                try {
+                    data[key] = JSON.parse(value);
+                } catch (error) {
+                    console.error('Invalid JSON in social links:', error);
+                    alert('Invalid JSON in social links');
+                    return;
+                }
+            } else if (key === 'skills') {
+                data[key] = value.split(',').map(skill => skill.trim()).filter(Boolean);
+            } else {
+                data[key] = value;
+            }
+        }
+
+        try {
+            const response = await fetch('/api/admin/personal', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+                alert('Personal data saved successfully!');
+            } else {
+                const error = await response.json();
+                alert(`Error: ${error.detail}`);
+            }
+        } catch (error) {
+            console.error('Error saving personal data:', error);
+            alert('Error saving personal data');
+        }
+    });
+});
+</script>
+{% endblock %} 

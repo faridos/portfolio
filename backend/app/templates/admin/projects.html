@@ -1,0 +1,456 @@
+{% extends "base.html" %}
+
+{% block title %}Projects Management - Portfolio Admin{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Projects Management</h2>
+    </div>
+    <div class="col text-end">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+            <i class="bi bi-plus-circle"></i> Add New Project
+        </button>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form id="filterForm" class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Search</label>
+                <input type="text" class="form-control" id="search" placeholder="Search by title or technologies...">
+            </div>
+            <div class="col-md-3">
+                <label for="featured" class="form-label">Featured</label>
+                <select class="form-select" id="featured">
+                    <option value="">All</option>
+                    <option value="true">Featured</option>
+                    <option value="false">Not Featured</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="sortBy" class="form-label">Sort By</label>
+                <select class="form-select" id="sortBy">
+                    <option value="title">Title</option>
+                    <option value="created_at">Date Added</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="sortOrder" class="form-label">Order</label>
+                <select class="form-select" id="sortOrder">
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Projects List -->
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Technologies</th>
+                <th>Featured</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="projectsList">
+            <!-- Projects will be loaded here dynamically -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Project Modal -->
+<div class="modal fade" id="addProjectModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="projectForm">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="technologies" class="form-label">Technologies (comma-separated)</label>
+                        <input type="text" class="form-control" id="technologies" name="technologies" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Project Image</label>
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                        <div id="imagePreview" class="mt-2" style="display: none;">
+                            <img src="" alt="Preview" style="max-width: 200px; max-height: 200px;">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="image_url" class="form-label">Image URL (if not uploading)</label>
+                        <input type="url" class="form-control" id="image_url" name="image_url">
+                    </div>
+                    <div class="mb-3">
+                        <label for="github_url" class="form-label">GitHub URL</label>
+                        <input type="url" class="form-control" id="github_url" name="github_url">
+                    </div>
+                    <div class="mb-3">
+                        <label for="live_url" class="form-label">Live URL</label>
+                        <input type="url" class="form-control" id="live_url" name="live_url">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="featured" name="featured">
+                        <label class="form-check-label" for="featured">Featured Project</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveProject()">Save Project</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Project Modal -->
+<div class="modal fade" id="editProjectModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProjectForm">
+                    <input type="hidden" id="edit_id" name="id">
+                    <div class="mb-3">
+                        <label for="edit_title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="edit_title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_description" class="form-label">Description</label>
+                        <textarea class="form-control" id="edit_description" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_technologies" class="form-label">Technologies (comma-separated)</label>
+                        <input type="text" class="form-control" id="edit_technologies" name="technologies" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_image" class="form-label">Project Image</label>
+                        <input type="file" class="form-control" id="edit_image" name="image" accept="image/*">
+                        <div id="editImagePreview" class="mt-2">
+                            <img src="" alt="Preview" style="max-width: 200px; max-height: 200px;">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_image_url" class="form-label">Image URL (if not uploading)</label>
+                        <input type="url" class="form-control" id="edit_image_url" name="image_url">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_github_url" class="form-label">GitHub URL</label>
+                        <input type="url" class="form-control" id="edit_github_url" name="github_url">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_live_url" class="form-label">Live URL</label>
+                        <input type="url" class="form-control" id="edit_live_url" name="live_url">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="edit_featured" name="featured">
+                        <label class="form-check-label" for="edit_featured">Featured Project</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="updateProject()">Update Project</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Load projects on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadProjects();
+    setupFilters();
+});
+
+let projects = [];
+
+function setupFilters() {
+    const filterInputs = ['search', 'featured', 'sortBy', 'sortOrder'];
+    filterInputs.forEach(input => {
+        document.getElementById(input).addEventListener('change', filterAndSortProjects);
+    });
+    document.getElementById('search').addEventListener('input', filterAndSortProjects);
+}
+
+function filterAndSortProjects() {
+    const searchTerm = document.getElementById('search').value.toLowerCase();
+    const featuredFilter = document.getElementById('featured').value;
+    const sortBy = document.getElementById('sortBy').value;
+    const sortOrder = document.getElementById('sortOrder').value;
+
+    let filteredProjects = projects.filter(project => {
+        const matchesSearch = project.title.toLowerCase().includes(searchTerm) ||
+                            project.technologies.some(tech => tech.toLowerCase().includes(searchTerm));
+        const matchesFeatured = featuredFilter === '' || project.featured.toString() === featuredFilter;
+        return matchesSearch && matchesFeatured;
+    });
+
+    filteredProjects.sort((a, b) => {
+        let comparison = 0;
+        if (sortBy === 'title') {
+            comparison = a.title.localeCompare(b.title);
+        } else if (sortBy === 'created_at') {
+            comparison = new Date(a.created_at) - new Date(b.created_at);
+        }
+        return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    displayProjects(filteredProjects);
+}
+
+function displayProjects(projectsToDisplay) {
+    const projectsList = document.getElementById('projectsList');
+    projectsList.innerHTML = projectsToDisplay.map(project => `
+        <tr>
+            <td>${project.title}</td>
+            <td>${project.technologies.join(', ')}</td>
+            <td>${project.featured ? 'Yes' : 'No'}</td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="editProject(${project.id})">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteProject(${project.id})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+async function loadProjects() {
+    try {
+        const response = await fetch('/api/admin/projects');
+        projects = await response.json();
+        filterAndSortProjects();
+    } catch (error) {
+        console.error('Error loading projects:', error);
+        alert('Error loading projects');
+    }
+}
+
+// Add image preview functionality
+document.getElementById('image').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('imagePreview');
+            preview.style.display = 'block';
+            preview.querySelector('img').src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+async function saveProject() {
+    const form = document.getElementById('projectForm');
+    const formData = new FormData(form);
+    const imageFile = formData.get('image');
+
+    try {
+        let imageUrl = formData.get('image_url');
+
+        // If an image file is selected, upload it first
+        if (imageFile && imageFile.size > 0) {
+            const uploadFormData = new FormData();
+            uploadFormData.append('file', imageFile);
+            
+            const uploadResponse = await fetch('/api/upload/image', {
+                method: 'POST',
+                body: uploadFormData
+            });
+            
+            if (!uploadResponse.ok) {
+                throw new Error('Failed to upload image');
+            }
+            
+            const uploadResult = await uploadResponse.json();
+            imageUrl = uploadResult.url;
+        }
+
+        const project = {
+            title: formData.get('title'),
+            description: formData.get('description'),
+            technologies: formData.get('technologies').split(',').map(t => t.trim()),
+            image_url: imageUrl,
+            github_url: formData.get('github_url'),
+            live_url: formData.get('live_url'),
+            featured: formData.get('featured') === 'on'
+        };
+
+        const response = await fetch('/api/admin/projects', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(project)
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to save project');
+        }
+
+        // Close modal and refresh projects
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addProjectModal'));
+        modal.hide();
+        form.reset();
+        document.getElementById('imagePreview').style.display = 'none';
+        loadProjects();
+    } catch (error) {
+        console.error('Error saving project:', error);
+        alert('Error saving project: ' + error.message);
+    }
+}
+
+// Add image preview functionality for edit form
+document.getElementById('edit_image').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('editImagePreview');
+            preview.style.display = 'block';
+            preview.querySelector('img').src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+async function editProject(id) {
+    try {
+        const response = await fetch(`/api/admin/projects/${id}`);
+        const project = await response.json();
+        
+        document.getElementById('edit_id').value = project.id;
+        document.getElementById('edit_title').value = project.title;
+        document.getElementById('edit_description').value = project.description;
+        document.getElementById('edit_technologies').value = project.technologies.join(', ');
+        document.getElementById('edit_image_url').value = project.image_url || '';
+        document.getElementById('edit_github_url').value = project.github_url || '';
+        document.getElementById('edit_live_url').value = project.live_url || '';
+        document.getElementById('edit_featured').checked = project.featured;
+
+        // Show current image preview if exists
+        const preview = document.getElementById('editImagePreview');
+        if (project.image_url) {
+            preview.style.display = 'block';
+            preview.querySelector('img').src = project.image_url;
+        } else {
+            preview.style.display = 'none';
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('editProjectModal'));
+        modal.show();
+    } catch (error) {
+        console.error('Error loading project:', error);
+        alert('Error loading project');
+    }
+}
+
+async function updateProject() {
+    const form = document.getElementById('editProjectForm');
+    const formData = new FormData(form);
+    const imageFile = document.getElementById('edit_image').files[0];
+    const projectId = formData.get('id');
+
+    try {
+        let imageUrl = formData.get('image_url');
+
+        // If an image file is selected, upload it first
+        if (imageFile) {
+            const uploadFormData = new FormData();
+            uploadFormData.append('file', imageFile);
+            uploadFormData.append('project_id', projectId);
+            
+            const uploadResponse = await fetch('/api/upload/image', {
+                method: 'POST',
+                body: uploadFormData
+            });
+            
+            if (!uploadResponse.ok) {
+                throw new Error('Failed to upload image');
+            }
+            
+            const uploadResult = await uploadResponse.json();
+            imageUrl = uploadResult.url;
+        }
+
+        const project = {
+            title: formData.get('title'),
+            description: formData.get('description'),
+            technologies: formData.get('technologies').split(',').map(t => t.trim()),
+            image_url: imageUrl,
+            github_url: formData.get('github_url'),
+            live_url: formData.get('live_url'),
+            featured: formData.get('featured') === 'on'
+        };
+
+        const response = await fetch(`/api/admin/projects/${projectId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(project)
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update project');
+        }
+
+        // Close modal and refresh projects
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editProjectModal'));
+        modal.hide();
+        form.reset();
+        document.getElementById('editImagePreview').style.display = 'none';
+        loadProjects();
+    } catch (error) {
+        console.error('Error updating project:', error);
+        alert('Error updating project: ' + error.message);
+    }
+}
+
+async function deleteProject(id) {
+    if (!confirm('Are you sure you want to delete this project?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/admin/projects/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            loadProjects();
+        } else {
+            throw new Error('Failed to delete project');
+        }
+    } catch (error) {
+        console.error('Error deleting project:', error);
+        alert('Error deleting project');
+    }
+}
+</script>
+{% endblock %} 
