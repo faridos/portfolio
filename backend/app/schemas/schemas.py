@@ -14,6 +14,15 @@ class ProjectBase(BaseModel):
 class ProjectCreate(ProjectBase):
     pass
 
+class ProjectUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    technologies: Optional[List[str]] = None
+    image_url: Optional[str] = None
+    github_url: Optional[str] = None
+    live_url: Optional[str] = None
+    featured: Optional[bool] = None
+
 class ProjectResponse(ProjectBase):
     id: int
     created_at: datetime
@@ -36,6 +45,15 @@ class ExperienceBase(BaseModel):
 
 class ExperienceCreate(ExperienceBase):
     pass
+
+class ExperienceUpdate(BaseModel):
+    company: Optional[str] = None
+    position: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    description: Optional[str] = None
+    location: Optional[str] = None
+    current: Optional[bool] = None
 
 class ExperienceResponse(ExperienceBase):
     id: int
@@ -61,6 +79,17 @@ class PersonalDataBase(BaseModel):
 
 class PersonalDataCreate(PersonalDataBase):
     pass
+
+class PersonalDataUpdate(BaseModel):
+    name: Optional[str] = None
+    title: Optional[str] = None
+    bio: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    location: Optional[str] = None
+    avatar_url: Optional[str] = None
+    social_links: Optional[Dict[str, str]] = None
+    skills: Optional[List[str]] = None
 
 class PersonalDataResponse(PersonalDataBase):
     id: int

@@ -28,7 +28,7 @@ A modern portfolio website built with FastAPI (backend) and React (frontend).
 - Axios
 - React Router
 
-## Setup
+## Development Setup
 
 ### Backend
 
@@ -79,16 +79,61 @@ cp .env.example .env
 npm start
 ```
 
-## Development
+## Docker Deployment
 
-- Backend API runs on http://localhost:8000
-- Frontend development server runs on http://localhost:3000
-- Admin dashboard is available at http://localhost:8000/admin
+1. Build and start the containers:
+```bash
+docker-compose up --build
+```
+
+2. Access the applications:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- Admin Dashboard: http://localhost:8000/admin
+
+## Production Deployment
+
+### Backend (FastAPI)
+
+1. Set up a production server (e.g., DigitalOcean, AWS, etc.)
+2. Install Docker and Docker Compose
+3. Copy the project files to the server
+4. Set up environment variables
+5. Run with Docker Compose:
+```bash
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+### Frontend (React)
+
+1. Build the frontend:
+```bash
+cd frontend
+npm run build
+```
+
+2. Deploy the build folder to a static hosting service (e.g., Netlify, Vercel, etc.)
+
+## CI/CD
+
+The project uses GitHub Actions for continuous integration and deployment:
+
+- Runs tests on every push and pull request
+- Builds the application
+- Deploys to production when merging to main
 
 ## API Documentation
 
 - Swagger UI: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 

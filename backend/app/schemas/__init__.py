@@ -3,12 +3,15 @@ from .schemas import (
     ProjectCreate,
     ProjectBase,
     ProjectResponse,
+    ProjectUpdate,
     Experience,
     ExperienceCreate,
     ExperienceBase,
     ExperienceResponse,
+    ExperienceUpdate,
     PersonalData,
     PersonalDataCreate,
     PersonalDataBase,
-    PersonalDataResponse
+    PersonalDataResponse,
+    PersonalDataUpdate
 ) 
