@@ -49,3 +49,5 @@ yarn-error.log*
 # Logs
 *.log
 logs/ 
+backend/app/static/logs
+backend/app/static/uploads

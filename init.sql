@@ -95,4 +95,4 @@ CREATE TABLE projects (
 CREATE INDEX ix_projects_id ON projects (id);
 
 INSERT INTO alembic_version (version_num) VALUES ('b83e45c8fd13') RETURNING alembic_version.version_num;
-COMMIT;
+COMMIT; 

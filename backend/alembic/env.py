@@ -7,8 +7,10 @@ import asyncio  # Import the asyncio module
 from sqlalchemy.ext.asyncio import create_async_engine  # Import create_async_engine
 from app.config import DATABASE_URL  # Import your DATABASE_URL
 from app.database import Base 
-from app.models.models import *
+from app.models import models
 from alembic import context
+import copy
+from sqlalchemy import MetaData
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -23,11 +25,14 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = Base.metadata
+print("Models detected:", list(target_metadata.tables.keys()))
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+# Associate the MetaData object with your models
+print('____________________',target_metadata)
 
 
 def run_migrations_offline() -> None:
@@ -85,13 +90,17 @@ def run_migrations_online() -> None:
     async def run_async_migrations():
         """Run the migrations asynchronously."""
         engine = create_async_engine(DATABASE_URL)
+        print("...............................", target_metadata.tables.keys(), Base.metadata)
         async with engine.connect() as connection:
-            await connection.run_sync(do_run_migrations)
-        await engine.dispose()  # Dispose of the engine
+            await connection.run_sync(lambda conn: do_run_migrations(conn, target_metadata)) 
+            await engine.dispose()  # Dispose of the engine
 
-    def do_run_migrations(connection):
+    def do_run_migrations(connection, metadata):
         """Run the actual migrations."""
-        context.configure(connection=connection, target_metadata=target_metadata)
+        print("#######################################", metadata.tables.keys(), Base.metadata)
+        context.configure(connection=connection, target_metadata=metadata)
+        print("#######################################", metadata.tables.keys(), Base.metadata)
+        
         context.run_migrations()
 
     asyncio.run(run_async_migrations())
