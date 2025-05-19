@@ -17,6 +17,12 @@ services:
     restart: always
     volumes:
       - ./backend/app/static/uploads:/app/app/static/uploads
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.odoo.rule=Host(`${BACKEND_DOMAIN}`)"
+      #- "traefik.http.services.odoo.loadbalancer.server.port=8000" # TODO check if this is needed
+      - "traefik.http.routers.odoo.entrypoints=websecure"
+      - "traefik.http.routers.odoo.tls.certresolver=myresolver"
 
   frontend:
     build:
@@ -27,6 +33,11 @@ services:
     environment:
       - REACT_APP_API_URL=${API_URL}
     restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.odoo.rule=Host(`${FRONTEND_DOMAIN}`)"
+      - "traefik.http.routers.odoo.entrypoints=websecure"
+      - "traefik.http.routers.odoo.tls.certresolver=myresolver"
 
   db:
     image: postgres:15
@@ -36,18 +47,6 @@ services:
       - POSTGRES_DB=portfolio
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: always
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "443:443"
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/ssl:/etc/nginx/ssl
-    depends_on:
-      - backend
-      - frontend
     restart: always
 
 volumes:

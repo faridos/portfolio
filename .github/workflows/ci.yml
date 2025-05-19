@@ -66,7 +66,31 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
+    - name: Install SSH Key
+      uses: webfactory/ssh-agent@v0.8.0
+      with:
+        ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+
     - name: Deploy to production
       run: |
         echo "Deploying to production..."
-        # Add your deployment commands here 
+
+        # Stop the current application
+        ssh root@123.234.567.11 "docker stop portfolio || true"
+
+        # Remove the old container
+        ssh root@123.234.567.11 "docker rm portfolio || true"
+
+        # Copy the new docker-compose.yml file
+        scp docker-compose.yml root@123.234.567.11:/root/
+
+        # Copy the new backend build
+        scp -r backend/ root@123.234.567.11:/root/
+
+        # Copy the new frontend build
+        scp -r frontend/ root@123.234.567.11:/root/
+
+        # Start the new application
+        ssh root@123.234.567.11 "docker-compose -f /root/docker-compose.yml up -d --build"
+
+        echo "Deployment complete!" 
