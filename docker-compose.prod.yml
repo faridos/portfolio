@@ -21,10 +21,10 @@ services:
       - ./backend/app/static/uploads:/app/app/static/uploads
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.odoo.rule=Host(`${BACKEND_DOMAIN}`)"
-      #- "traefik.http.services.odoo.loadbalancer.server.port=8000" # TODO check if this is needed
-      - "traefik.http.routers.odoo.entrypoints=websecure"
-      - "traefik.http.routers.odoo.tls.certresolver=myresolver"
+      - "traefik.http.routers.backendservice.rule=Host(`${BACKEND_DOMAIN}`)"
+      #- "traefik.http.services.backendservice.loadbalancer.server.port=8000" # TODO check if this is needed
+      - "traefik.http.routers.backendservice.entrypoints=websecure"
+      - "traefik.http.routers.backendservice.tls.certresolver=myresolver"
 
   frontend:
     build:
@@ -38,9 +38,9 @@ services:
     restart: always
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.odoo.rule=Host(`${FRONTEND_DOMAIN}`)"
-      - "traefik.http.routers.odoo.entrypoints=websecure"
-      - "traefik.http.routers.odoo.tls.certresolver=myresolver"
+      - "traefik.http.routers.frontendservice.rule=Host(`${FRONTEND_DOMAIN}`)"
+      - "traefik.http.routers.frontendservice.entrypoints=websecure"
+      - "traefik.http.routers.frontendservice.tls.certresolver=myresolver"
 
   db:
     image: postgres:15-bullseye
