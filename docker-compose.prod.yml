@@ -40,7 +40,7 @@ services:
       - "traefik.http.routers.odoo.tls.certresolver=myresolver"
 
   db:
-    image: postgres:15
+    image: postgres:15-bullseye
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=${DB_PASSWORD}
