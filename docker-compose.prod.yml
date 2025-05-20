@@ -24,7 +24,7 @@ services:
       - "traefik.http.routers.backendservice.rule=Host(`${BACKEND_DOMAIN}`)"
       #- "traefik.http.services.backendservice.loadbalancer.server.port=8000" # TODO check if this is needed
       - "traefik.http.routers.backendservice.entrypoints=websecure"
-      - "traefik.http.routers.backendservice.tls.certresolver=myresolver"
+      - "traefik.http.routers.backendservice.tls.certresolver=letsencrypt"
 
   frontend:
     build:
@@ -40,7 +40,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.frontendservice.rule=Host(`${FRONTEND_DOMAIN}`)"
       - "traefik.http.routers.frontendservice.entrypoints=websecure"
-      - "traefik.http.routers.frontendservice.tls.certresolver=myresolver"
+      - "traefik.http.routers.frontendservice.tls.certresolver=letsencrypt"
 
   db:
     image: postgres:15-bullseye
