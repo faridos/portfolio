@@ -5,8 +5,8 @@ services:
     build: 
       context: ./backend
       dockerfile: Dockerfile.prod
-    ports:
-      - "8000:8000"
+      #ports:
+      #- "8000:8000"
     environment:
       - DATABASE_URL=postgresql+asyncpg://postgres:${DB_PASSWORD}@db:5432/portfolio
       - SECRET_KEY=${SECRET_KEY}
@@ -21,7 +21,8 @@ services:
       - ./backend/app/static/uploads:/app/app/static/uploads
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backendservice.rule=Host(`${BACKEND_DOMAIN}`)"
+      #apiportfolio.le-5ra.de BACKEND_DOMAIN
+      - "traefik.http.routers.backendservice.rule=Host(`apiportfolio.le-5ra.de`)"
       - "traefik.http.services.backendservice.loadbalancer.server.port=8000" # TODO check if this is needed
       - "traefik.http.routers.backendservice.entrypoints=websecure"
       - "traefik.http.routers.backendservice.tls.certresolver=letsencrypt"
@@ -30,15 +31,15 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
-    ports:
-      - "3000:3000"
+      # ports:
+            #  - "3000:3000"
     environment:
       - REACT_APP_API_URL=${API_URL}
       - FRONTEND_DOMAIN=${FRONTEND_DOMAIN}
     restart: always
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontendservice.rule=Host(`${FRONTEND_DOMAIN}`)"
+      - "traefik.http.routers.frontendservice.rule=Host(`faridmaghraoui.le-5ra.de`)"
       - "traefik.http.routers.frontendservice.entrypoints=websecure"
       - "traefik.http.services.frontendservice.loadbalancer.server.port=3000"
       - "traefik.http.routers.frontendservice.tls.certresolver=letsencrypt"
@@ -56,4 +57,11 @@ services:
     restart: always
 
 volumes:
-  postgres_data: 
+  postgres_data:
+       
+
+networks:
+  default:
+    external:
+      name: traefik-proxy
+ 
