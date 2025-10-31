@@ -22,7 +22,7 @@ services:
     labels:
       - "traefik.enable=true"
       #apiportfolio.le-5ra.de BACKEND_DOMAIN
-      - "traefik.http.routers.backendservice.rule=Host(`apiportfolio.le-5ra.de`)"
+      - "traefik.http.routers.backendservice.rule=Host(`apiportfolio.madeingermany.tn`)"
       - "traefik.http.services.backendservice.loadbalancer.server.port=8000" # TODO check if this is needed
       - "traefik.http.routers.backendservice.entrypoints=websecure"
       - "traefik.http.routers.backendservice.tls.certresolver=letsencrypt"
@@ -39,7 +39,7 @@ services:
     restart: always
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontendservice.rule=Host(`faridmaghraoui.le-5ra.de`)"
+      - "traefik.http.routers.frontendservice.rule=Host(`faridmaghraoui.madeingermany.tn`)"
       - "traefik.http.routers.frontendservice.entrypoints=websecure"
       - "traefik.http.services.frontendservice.loadbalancer.server.port=3000"
       - "traefik.http.routers.frontendservice.tls.certresolver=letsencrypt"

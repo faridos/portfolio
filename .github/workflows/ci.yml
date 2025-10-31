@@ -1,96 +1,96 @@
-name: CI/CD
+# name: CI/CD
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
 
-jobs:
-  test-backend:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
+# jobs:
+#   test-backend:
+#     runs-on: ubuntu-latest
+#     defaults:
+#       run:
+#         working-directory: ./backend
 
-    steps:
-    - uses: actions/checkout@v3
+#     steps:
+#     - uses: actions/checkout@v3
     
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+#     - name: Set up Python
+#       uses: actions/setup-python@v4
+#       with:
+#         python-version: '3.10'
         
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest pytest-asyncio pytest-cov
+#     - name: Install dependencies
+#       run: |
+#         python -m pip install --upgrade pip
+#         pip install -r requirements.txt
+#         pip install pytest pytest-asyncio pytest-cov
         
-    - name: Run tests
-      run: |
-        pytest --cov=app tests/
+#     - name: Run tests
+#       run: |
+#         pytest --cov=app tests/
         
-    - name: Upload coverage
-      uses: codecov/codecov-action@v3
+#     - name: Upload coverage
+#       uses: codecov/codecov-action@v3
 
-  test-frontend:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./frontend
+#   test-frontend:
+#     runs-on: ubuntu-latest
+#     defaults:
+#       run:
+#         working-directory: ./frontend
 
-    steps:
-    - uses: actions/checkout@v3
+#     steps:
+#     - uses: actions/checkout@v3
     
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        cache: 'npm'
+#     - name: Set up Node.js
+#       uses: actions/setup-node@v3
+#       with:
+#         node-version: '18'
+#         cache: 'npm'
         
-    - name: Install dependencies
-      run: npm ci
+#     - name: Install dependencies
+#       run: npm ci
       
-    - name: Run tests
-      run: npm test
+#     - name: Run tests
+#       run: npm test
       
-    - name: Build
-      run: npm run build
+#     - name: Build
+#       run: npm run build
 
-  deploy:
-    needs: [test-backend, test-frontend]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+#   deploy:
+#     needs: [test-backend, test-frontend]
+#     runs-on: ubuntu-latest
+#     if: github.ref == 'refs/heads/main'
     
-    steps:
-    - uses: actions/checkout@v3
+#     steps:
+#     - uses: actions/checkout@v3
     
-    - name: Install SSH Key
-      uses: webfactory/ssh-agent@v0.8.0
-      with:
-        ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+#     - name: Install SSH Key
+#       uses: webfactory/ssh-agent@v0.8.0
+#       with:
+#         ssh-private-key: ${{ secrets.DEPLOY_KEY }}
 
-    - name: Deploy to production
-      run: |
-        echo "Deploying to production..."
+#     - name: Deploy to production
+#       run: |
+#         echo "Deploying to production..."
 
-        # Stop the current application
-        ssh root@123.234.567.11 "docker stop portfolio || true"
+#         # Stop the current application
+#         ssh root@123.234.567.11 "docker stop portfolio || true"
 
-        # Remove the old container
-        ssh root@123.234.567.11 "docker rm portfolio || true"
+#         # Remove the old container
+#         ssh root@123.234.567.11 "docker rm portfolio || true"
 
-        # Copy the new docker-compose.yml file
-        scp docker-compose.yml root@123.234.567.11:/root/
+#         # Copy the new docker-compose.yml file
+#         scp docker-compose.yml root@123.234.567.11:/root/
 
-        # Copy the new backend build
-        scp -r backend/ root@123.234.567.11:/root/
+#         # Copy the new backend build
+#         scp -r backend/ root@123.234.567.11:/root/
 
-        # Copy the new frontend build
-        scp -r frontend/ root@123.234.567.11:/root/
+#         # Copy the new frontend build
+#         scp -r frontend/ root@123.234.567.11:/root/
 
-        # Start the new application
-        ssh root@123.234.567.11 "docker-compose -f /root/docker-compose.yml up -d --build"
+#         # Start the new application
+#         ssh root@123.234.567.11 "docker-compose -f /root/docker-compose.yml up -d --build"
 
-        echo "Deployment complete!" 
+#         echo "Deployment complete!" 

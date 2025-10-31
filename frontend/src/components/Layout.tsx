@@ -57,7 +57,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </IconButton>
           )}
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Your Name
+            The Portfolio
           </Typography>
           {!isMobile && (
             <Box sx={{ display: 'flex' }}>
@@ -112,7 +112,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       >
         <Container maxWidth="sm">
           <Typography variant="body2" color="text.secondary" align="center">
-            © {new Date().getFullYear()} Your Name. All rights reserved.
+            © {new Date().getFullYear()}. All rights reserved.
           </Typography>
         </Container>
       </Box>

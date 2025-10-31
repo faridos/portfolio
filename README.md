@@ -53,6 +53,9 @@ cp .env.example .env
 4. Run migrations:
 ```bash
 alembic upgrade head
+
+in docker compose : docker compose exec backend alembic upgrade head
+
 ```
 
 5. Start the server:

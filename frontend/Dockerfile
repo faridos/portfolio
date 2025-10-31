@@ -2,18 +2,20 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Install dependencies
+# Copy package files first for caching
 COPY package*.json ./
+
+# Install dependencies
 RUN npm install --legacy-peer-deps
 
-# Copy application code
+# Copy your source code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Set environment variable for React
+ENV CHOKIDAR_USEPOLLING=true
 
-# Install serve to run the application
-RUN npm install -g serve
+# Expose port
+EXPOSE 3000
 
-# Start the application
-CMD ["serve", "-s", "build", "-l", "3000"] 
+# Run React development server
+CMD ["npm", "start"]
