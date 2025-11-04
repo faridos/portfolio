@@ -45,9 +45,38 @@
                         <input type="text" id="skills" name="skills" class="form-control">
                     </div>
 
-                    <div class="col-12">
-                        <label for="social_links" class="form-label">Social Links (JSON)</label>
-                        <textarea id="social_links" name="social_links" rows="4" class="form-control font-monospace"></textarea>
+                    <div class="col-md-6">
+                        <label for="avatar_file" class="form-label">Avatar Image</label>
+                        <input type="file" id="avatar_file" name="avatar_file" class="form-control" accept="image/*">
+                        <div class="form-text">Upload a profile picture (max 5MB)</div>
+                        <div id="current-avatar" class="mt-2"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="photo_file" class="form-label">Additional Photo</label>
+                        <input type="file" id="photo_file" name="photo_file" class="form-control" accept="image/*">
+                        <div class="form-text">Upload an additional photo (max 5MB)</div>
+                        <div id="current-photo" class="mt-2"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="github_url" class="form-label">GitHub URL</label>
+                        <input type="url" id="github_url" name="github_url" class="form-control" placeholder="https://github.com/username">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="linkedin_url" class="form-label">LinkedIn URL</label>
+                        <input type="url" id="linkedin_url" name="linkedin_url" class="form-control" placeholder="https://linkedin.com/in/username">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="twitter_url" class="form-label">Twitter URL (Optional)</label>
+                        <input type="url" id="twitter_url" name="twitter_url" class="form-control" placeholder="https://twitter.com/username">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="instagram_url" class="form-label">Instagram URL (Optional)</label>
+                        <input type="url" id="instagram_url" name="instagram_url" class="form-control" placeholder="https://instagram.com/username">
                     </div>
                 </div>
 
@@ -75,10 +104,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 Object.keys(data).forEach(key => {
                     const input = form.elements[key];
                     if (input) {
-                        if (key === 'social_links') {
-                            input.value = JSON.stringify(data[key], null, 2);
+                        if (key === 'social_links' && data[key]) {
+                            // Handle individual social links
+                            if (data[key].github) document.getElementById('github_url').value = data[key].github;
+                            if (data[key].linkedin) document.getElementById('linkedin_url').value = data[key].linkedin;
+                            if (data[key].twitter) document.getElementById('twitter_url').value = data[key].twitter;
+                            if (data[key].instagram) document.getElementById('instagram_url').value = data[key].instagram;
                         } else if (key === 'skills') {
                             input.value = data[key].join(', ');
+                        } else if (key === 'avatar_url' && data[key]) {
+                            // Show current avatar
+                            const avatarDiv = document.getElementById('current-avatar');
+                            avatarDiv.innerHTML = `<img src="${data[key]}" alt="Current Avatar" style="max-width: 100px; max-height: 100px; border-radius: 8px;">`;
+                        } else if (key === 'photo_url' && data[key]) {
+                            // Show current photo
+                            const photoDiv = document.getElementById('current-photo');
+                            photoDiv.innerHTML = `<img src="${data[key]}" alt="Current Photo" style="max-width: 100px; max-height: 100px; border-radius: 8px;">`;
                         } else {
                             input.value = data[key];
                         }
@@ -93,25 +134,79 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Handle form submission
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const formData = new FormData(form);
         const data = {};
-        
-        for (const [key, value] of formData.entries()) {
-            if (key === 'social_links') {
-                try {
-                    data[key] = JSON.parse(value);
-                } catch (error) {
-                    console.error('Invalid JSON in social links:', error);
-                    alert('Invalid JSON in social links');
-                    return;
+
+        // Handle file uploads first
+        const avatarFile = formData.get('avatar_file');
+        const photoFile = formData.get('photo_file');
+
+        // Upload avatar if provided
+        if (avatarFile && avatarFile.size > 0) {
+            try {
+                const avatarFormData = new FormData();
+                avatarFormData.append('file', avatarFile);
+                const avatarResponse = await fetch('/api/upload/image', {
+                    method: 'POST',
+                    body: avatarFormData,
+                });
+                if (avatarResponse.ok) {
+                    const avatarResult = await avatarResponse.json();
+                    data.avatar_url = avatarResult.url;
                 }
-            } else if (key === 'skills') {
+            } catch (error) {
+                console.error('Error uploading avatar:', error);
+                alert('Error uploading avatar');
+                return;
+            }
+        }
+
+        // Upload photo if provided
+        if (photoFile && photoFile.size > 0) {
+            try {
+                const photoFormData = new FormData();
+                photoFormData.append('file', photoFile);
+                const photoResponse = await fetch('/api/upload/image', {
+                    method: 'POST',
+                    body: photoFormData,
+                });
+                if (photoResponse.ok) {
+                    const photoResult = await photoResponse.json();
+                    data.photo_url = photoResult.url;
+                }
+            } catch (error) {
+                console.error('Error uploading photo:', error);
+                alert('Error uploading photo');
+                return;
+            }
+        }
+
+        // Process other form fields
+        for (const [key, value] of formData.entries()) {
+            if (key === 'skills') {
                 data[key] = value.split(',').map(skill => skill.trim()).filter(Boolean);
-            } else {
+            } else if (!key.includes('_file')) { // Skip file inputs
                 data[key] = value;
             }
         }
+
+        // Build social_links object from individual fields
+        const socialLinks = {};
+        if (data.github_url) socialLinks.github = data.github_url;
+        if (data.linkedin_url) socialLinks.linkedin = data.linkedin_url;
+        if (data.twitter_url) socialLinks.twitter = data.twitter_url;
+        if (data.instagram_url) socialLinks.instagram = data.instagram_url;
+
+        if (Object.keys(socialLinks).length > 0) {
+            data.social_links = socialLinks;
+        }
+
+        // Remove individual social link fields from data
+        delete data.github_url;
+        delete data.linkedin_url;
+        delete data.twitter_url;
+        delete data.instagram_url;
 
         try {
             const response = await fetch('/api/admin/personal', {
@@ -124,6 +219,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (response.ok) {
                 alert('Personal data saved successfully!');
+                // Refresh the page to show updated images
+                window.location.reload();
             } else {
                 const error = await response.json();
                 alert(`Error: ${error.detail}`);

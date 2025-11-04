@@ -58,7 +58,8 @@ class PersonalData(BaseModel):
     phone = Column(String(20), nullable=True)
     location = Column(String(100), nullable=True)
     avatar_url = Column(String(255), nullable=True)
+    photo_url = Column(String(255), nullable=True)  # Additional photo field
     social_links = Column(JSON, nullable=True)  # Dictionary of social media links
     skills = Column(JSON, nullable=True)  # List of skills
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False) 
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)

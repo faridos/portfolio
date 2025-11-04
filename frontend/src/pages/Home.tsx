@@ -58,6 +58,7 @@ const Home: React.FC = () => {
     bio: personalData?.bio || 'Your Bio',
     summary: personalData?.summary || '',
     avatar_url: personalData?.avatar_url || '',
+    photo_url: personalData?.photo_url || '',
     github_url: personalData?.github_url || '#',
     linkedin_url: personalData?.linkedin_url || '#',
     skills: personalData?.skills || [],

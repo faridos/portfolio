@@ -74,6 +74,7 @@ class PersonalDataBase(BaseModel):
     phone: Optional[str] = None
     location: Optional[str] = None
     avatar_url: Optional[str] = None
+    photo_url: Optional[str] = None
     social_links: Optional[Dict[str, str]] = None
     skills: Optional[List[str]] = None
 
@@ -88,6 +89,7 @@ class PersonalDataUpdate(BaseModel):
     phone: Optional[str] = None
     location: Optional[str] = None
     avatar_url: Optional[str] = None
+    photo_url: Optional[str] = None
     social_links: Optional[Dict[str, str]] = None
     skills: Optional[List[str]] = None
 

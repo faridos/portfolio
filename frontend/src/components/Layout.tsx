@@ -42,7 +42,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   );
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <AppBar
         position="static"
         sx={{
@@ -154,16 +154,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {drawer}
       </Drawer>
 
-      <Container component="main" sx={{ flexGrow: 1, py: 4 }}>
+      {/* Remove the Container wrapper and flexGrow to eliminate empty space */}
+      <Box component="main">
         {children}
-      </Container>
+      </Box>
 
       <Box
         component="footer"
         sx={{
           py: 3,
           px: 2,
-          mt: 'auto',
           backgroundColor: (theme) => theme.palette.grey[200],
         }}
       >

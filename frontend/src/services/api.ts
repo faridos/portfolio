@@ -41,6 +41,7 @@ export interface PersonalData {
   email: string;
   location: string;
   avatar_url: string;
+  photo_url: string;
   linkedin_url: string;
   github_url: string;
   skills: string[];

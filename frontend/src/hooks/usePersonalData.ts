@@ -10,6 +10,7 @@ export const usePersonalData = () => {
     email: '',
     location: '',
     avatar_url: '',
+    photo_url: '',
     linkedin_url: '',
     github_url: '',
     skills: [],
