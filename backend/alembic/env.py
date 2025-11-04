@@ -87,23 +87,22 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    async def run_async_migrations():
-        """Run the migrations asynchronously."""
-        engine = create_async_engine(DATABASE_URL)
-        print("...............................", target_metadata.tables.keys(), Base.metadata)
-        async with engine.connect() as connection:
-            await connection.run_sync(lambda conn: do_run_migrations(conn, target_metadata)) 
-            await engine.dispose()  # Dispose of the engine
+    # Use synchronous connection for migrations to avoid async issues
+    from app.config import DATABASE_URL
+    from sqlalchemy import create_engine
 
-    def do_run_migrations(connection, metadata):
-        """Run the actual migrations."""
-        print("#######################################", metadata.tables.keys(), Base.metadata)
-        context.configure(connection=connection, target_metadata=metadata)
-        print("#######################################", metadata.tables.keys(), Base.metadata)
-        
-        context.run_migrations()
+    # Convert async URL to sync URL for migrations
+    sync_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
 
-    asyncio.run(run_async_migrations())
+    connectable = create_engine(sync_url, echo=True)
+
+    with connectable.connect() as connection:
+        context.configure(
+            connection=connection, target_metadata=target_metadata
+        )
+
+        with context.begin_transaction():
+            context.run_migrations()
 
 if context.is_offline_mode():
     run_migrations_offline()

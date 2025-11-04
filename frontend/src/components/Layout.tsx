@@ -1,6 +1,6 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Container, Box, IconButton, Drawer, List, ListItem, ListItemText, useTheme, useMediaQuery } from '@mui/material';
-import { Menu as MenuIcon } from '@mui/icons-material';
+import { AppBar, Toolbar, Typography, Container, Box, IconButton, Drawer, List, ListItem, ListItemText, useTheme, useMediaQuery, Avatar, Button } from '@mui/material';
+import { Menu as MenuIcon, AccountCircle as AccountCircleIcon } from '@mui/icons-material';
 import { Link, useLocation } from 'react-router-dom';
 
 interface LayoutProps {
@@ -43,8 +43,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppBar position="static">
-        <Toolbar>
+      <AppBar
+        position="static"
+        sx={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+          height: isMobile ? '70px' : '80px',
+        }}
+      >
+        <Toolbar sx={{ height: '100%', px: isMobile ? 2 : 4 }}>
           {isMobile && (
             <IconButton
               color="inherit"
@@ -56,26 +63,76 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <MenuIcon />
             </IconButton>
           )}
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            The Portfolio
-          </Typography>
+
+          {/* Logo/Brand Section */}
+          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+            <Avatar
+              sx={{
+                width: isMobile ? 40 : 50,
+                height: isMobile ? 40 : 50,
+                mr: 2,
+                background: 'rgba(255,255,255,0.2)',
+                backdropFilter: 'blur(10px)',
+              }}
+            >
+              P
+            </Avatar>
+            <Typography
+              variant={isMobile ? "h6" : "h5"}
+              component="div"
+              sx={{
+                fontWeight: 700,
+                background: 'linear-gradient(45deg, #ffffff 30%, #f0f0f0 90%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                textShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              }}
+            >
+              The Portfolio
+            </Typography>
+          </Box>
+
           {!isMobile && (
-            <Box sx={{ display: 'flex' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {menuItems.map((item) => (
-                <Typography
+                <Button
                   key={item.text}
                   component={Link}
                   to={item.path}
                   sx={{
                     color: 'white',
                     textDecoration: 'none',
-                    mx: 2,
+                    mx: 1,
+                    px: 2,
+                    py: 1,
+                    borderRadius: '25px',
                     fontWeight: location.pathname === item.path ? 'bold' : 'normal',
+                    backgroundColor: location.pathname === item.path ? 'rgba(255,255,255,0.2)' : 'transparent',
+                    backdropFilter: 'blur(10px)',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.3)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+                    },
                   }}
                 >
                   {item.text}
-                </Typography>
+                </Button>
               ))}
+              <IconButton
+                color="inherit"
+                sx={{
+                  ml: 2,
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                  },
+                }}
+              >
+                <AccountCircleIcon />
+              </IconButton>
             </Box>
           )}
         </Toolbar>

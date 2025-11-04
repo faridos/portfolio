@@ -13,7 +13,7 @@ export interface Project {
   id: number;
   title: string;
   description: string;
-  image_url: string;
+  image_urls: string[];
   technologies: string[];
   github_url: string;
   live_url: string;
@@ -104,6 +104,23 @@ export const uploadImage = async (file: File, projectId?: number): Promise<{ url
   }
 
   const response = await api.post('/api/upload/image', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+export const uploadMultipleImages = async (files: File[], projectId?: number): Promise<{ urls: string[] }> => {
+  const formData = new FormData();
+  files.forEach((file, index) => {
+    formData.append('files', file);
+  });
+  if (projectId) {
+    formData.append('project_id', projectId.toString());
+  }
+
+  const response = await api.post('/api/upload/images', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },

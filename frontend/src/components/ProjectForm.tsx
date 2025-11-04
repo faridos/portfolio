@@ -28,7 +28,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
   const [formData, setFormData] = useState<Partial<Project>>({
     title: '',
     description: '',
-    image_url: '',
+    image_urls: [],
     technologies: [],
     github_url: '',
     live_url: '',
@@ -72,7 +72,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       const result = await uploadImage(file, formData.id);
       setFormData((prev) => ({
         ...prev,
-        image_url: result.url,
+        image_urls: [...(prev.image_urls || []), result.url],
       }));
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -96,7 +96,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <ImageUpload
-              currentImageUrl={formData.image_url}
+              currentImageUrls={formData.image_urls}
               onImageUpload={handleImageUpload}
             />
           </Grid>

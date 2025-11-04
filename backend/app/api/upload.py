@@ -1,5 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request
 from fastapi.responses import JSONResponse
+from typing import List
 import os
 import aiofiles
 from datetime import datetime
@@ -90,4 +91,77 @@ async def upload_image(
         "message": "File uploaded successfully",
         "filename": filename,
         "url": image_url
-    }) 
+    })
+
+@router.post("/images")
+async def upload_multiple_images(
+    request: Request,
+    files: List[UploadFile] = File(...),
+    project_id: int = None,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(authenticate_admin)
+):
+    uploaded_urls = []
+
+    for file in files:
+        # Validate file extension
+        if get_file_extension(file.filename) not in ALLOWED_EXTENSIONS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"File type not allowed for {file.filename}. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}"
+            )
+
+        # Validate file size
+        file_size = 0
+        chunk_size = 1024 * 1024  # 1MB chunks
+        while chunk := await file.read(chunk_size):
+            file_size += len(chunk)
+            if file_size > MAX_FILE_SIZE:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"File {file.filename} too large. Maximum size: {MAX_FILE_SIZE/1024/1024}MB"
+                )
+        await file.seek(0)
+
+        # Generate unique filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        extension = get_file_extension(file.filename)
+        filename = f"{timestamp}_{file.filename}"
+        filepath = os.path.join(UPLOAD_DIR, filename)
+
+        # Save file
+        async with aiofiles.open(filepath, 'wb') as out_file:
+            content = await file.read()
+            await out_file.write(content)
+
+        # Get base URL from request
+        base_url = str(request.base_url).rstrip('/')
+        image_url = f"{base_url}/static/uploads/{filename}"
+        uploaded_urls.append(image_url)
+
+    # If project_id is provided, update the project's image_urls
+    if project_id:
+        query = select(Project).where(Project.id == project_id)
+        result = await db.execute(query)
+        project = result.scalar_one_or_none()
+
+        if not project:
+            # Delete the uploaded files if project not found
+            for url in uploaded_urls:
+                filepath = os.path.join(UPLOAD_DIR, os.path.basename(url))
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+            raise HTTPException(status_code=404, detail="Project not found")
+
+        # Get existing image URLs or initialize empty list
+        existing_urls = project.image_urls or []
+
+        # Add new URLs to existing ones
+        updated_urls = existing_urls + uploaded_urls
+        project.image_urls = updated_urls
+        await db.commit()
+
+    return JSONResponse({
+        "message": f"{len(uploaded_urls)} files uploaded successfully",
+        "urls": uploaded_urls
+    })

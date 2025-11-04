@@ -9,10 +9,12 @@ import {
   Box,
   IconButton,
   Tooltip,
+  Badge,
 } from '@mui/material';
 import {
   GitHub as GitHubIcon,
   Launch as LaunchIcon,
+  Image as ImageIcon,
 } from '@mui/icons-material';
 
 interface ProjectPreviewProps {
@@ -20,7 +22,7 @@ interface ProjectPreviewProps {
     id: number;
     title: string;
     description: string;
-    image_url: string;
+    image_urls: string[];
     technologies: string[];
     github_url: string;
     live_url: string;
@@ -47,7 +49,7 @@ const ProjectPreview: React.FC<ProjectPreviewProps> = ({ project, onPreviewClick
       <CardMedia
         component="img"
         height="200"
-        image={project.image_url}
+        image={project.image_urls && project.image_urls.length > 0 ? project.image_urls[0] : ''}
         alt={project.title}
         sx={{ objectFit: 'cover' }}
       />
@@ -79,31 +81,42 @@ const ProjectPreview: React.FC<ProjectPreviewProps> = ({ project, onPreviewClick
             />
           ))}
         </Stack>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-          <Tooltip title="View on GitHub">
-            <IconButton 
-              size="small" 
-              onClick={(e) => {
-                e.stopPropagation();
-                window.open(project.github_url, '_blank');
-              }}
-            >
-              <GitHubIcon />
-            </IconButton>
-          </Tooltip>
-          {project.live_url && (
-            <Tooltip title="View Live Demo">
-              <IconButton 
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            {(project.image_urls && project.image_urls.length > 1) && (
+              <Tooltip title={`${project.image_urls.length} images available`}>
+                <Badge badgeContent={project.image_urls.length} color="primary">
+                  <ImageIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
+                </Badge>
+              </Tooltip>
+            )}
+          </Box>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Tooltip title="View on GitHub">
+              <IconButton
                 size="small"
                 onClick={(e) => {
                   e.stopPropagation();
-                  window.open(project.live_url, '_blank');
+                  window.open(project.github_url, '_blank');
                 }}
               >
-                <LaunchIcon />
+                <GitHubIcon />
               </IconButton>
             </Tooltip>
-          )}
+            {project.live_url && (
+              <Tooltip title="View Live Demo">
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(project.live_url, '_blank');
+                  }}
+                >
+                  <LaunchIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+          </Box>
         </Box>
       </CardContent>
     </Card>

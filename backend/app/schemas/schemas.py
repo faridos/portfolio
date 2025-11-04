@@ -6,7 +6,7 @@ class ProjectBase(BaseModel):
     title: str
     description: str
     technologies: List[str]
-    image_url: Optional[str] = None
+    image_urls: Optional[List[str]] = None
     github_url: Optional[str] = None
     live_url: Optional[str] = None
     featured: bool = False
@@ -18,7 +18,7 @@ class ProjectUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     technologies: Optional[List[str]] = None
-    image_url: Optional[str] = None
+    image_urls: Optional[List[str]] = None
     github_url: Optional[str] = None
     live_url: Optional[str] = None
     featured: Optional[bool] = None

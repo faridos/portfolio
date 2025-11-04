@@ -19,12 +19,12 @@ class AdminUser(BaseModel):
 
 class Project(BaseModel):
     __tablename__ = "projects"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(100), nullable=False)
     description = Column(Text, nullable=False)
     technologies = Column(JSON, nullable=False)  # List of technologies used
-    image_url = Column(String(255), nullable=True)
+    image_urls = Column(JSON, nullable=True)  # List of image URLs
     github_url = Column(String(255), nullable=True)
     live_url = Column(String(255), nullable=True)
     featured = Column(Boolean, default=False, nullable=False)

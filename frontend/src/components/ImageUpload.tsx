@@ -12,20 +12,20 @@ import {
 } from '@mui/icons-material';
 
 interface ImageUploadProps {
-  currentImageUrl?: string;
+  currentImageUrls?: string[];
   onImageUpload: (file: File) => Promise<void>;
   onImageDelete?: () => Promise<void>;
   disabled?: boolean;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
-  currentImageUrl,
+  currentImageUrls,
   onImageUpload,
   onImageDelete,
   disabled = false,
 }) => {
   const [isUploading, setIsUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(currentImageUrl || null);
+  const [previewUrls, setPreviewUrls] = useState<string[]>((currentImageUrls && currentImageUrls.length > 0) ? currentImageUrls : []);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,7 +35,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     // Create preview
     const reader = new FileReader();
     reader.onloadend = () => {
-      setPreviewUrl(reader.result as string);
+      setPreviewUrls(prev => [...prev, reader.result as string]);
     };
     reader.readAsDataURL(file);
 
@@ -45,19 +45,23 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       await onImageUpload(file);
     } catch (error) {
       console.error('Error uploading image:', error);
-      setPreviewUrl(currentImageUrl || null);
+      setPreviewUrls(currentImageUrls || []);
     } finally {
       setIsUploading(false);
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (indexToDelete?: number) => {
     if (!onImageDelete) return;
-    
+
     try {
       setIsUploading(true);
       await onImageDelete();
-      setPreviewUrl(null);
+      if (indexToDelete !== undefined) {
+        setPreviewUrls(prev => prev.filter((_, index) => index !== indexToDelete));
+      } else {
+        setPreviewUrls([]);
+      }
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -93,19 +97,25 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         disabled={disabled || isUploading}
       />
 
-      {previewUrl ? (
+      {previewUrls.length > 0 ? (
         <>
-          <Box
-            component="img"
-            src={previewUrl}
-            alt="Preview"
-            sx={{
-              maxWidth: '100%',
-              maxHeight: 200,
-              objectFit: 'contain',
-              mb: 2,
-            }}
-          />
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+            {previewUrls.map((url, index) => (
+              <Box
+                key={index}
+                component="img"
+                src={url}
+                alt={`Preview ${index + 1}`}
+                sx={{
+                  width: 80,
+                  height: 80,
+                  objectFit: 'cover',
+                  borderRadius: 1,
+                  position: 'relative',
+                }}
+              />
+            ))}
+          </Box>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button
               variant="outlined"
@@ -113,12 +123,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               disabled={disabled || isUploading}
               startIcon={<UploadIcon />}
             >
-              Change Image
+              Add More Images
             </Button>
             {onImageDelete && (
               <IconButton
                 color="error"
-                onClick={handleDelete}
+                onClick={() => handleDelete()}
                 disabled={disabled || isUploading}
               >
                 <DeleteIcon />
@@ -133,7 +143,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           disabled={disabled || isUploading}
           startIcon={<UploadIcon />}
         >
-          Upload Image
+          Upload Images
         </Button>
       )}
 

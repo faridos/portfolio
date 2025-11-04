@@ -88,15 +88,15 @@
                         <input type="text" class="form-control" id="technologies" name="technologies" required>
                     </div>
                     <div class="mb-3">
-                        <label for="image" class="form-label">Project Image</label>
-                        <input type="file" class="form-control" id="image" name="image" accept="image/*">
-                        <div id="imagePreview" class="mt-2" style="display: none;">
-                            <img src="" alt="Preview" style="max-width: 200px; max-height: 200px;">
+                        <label for="images" class="form-label">Project Images (Multiple)</label>
+                        <input type="file" class="form-control" id="images" name="images" accept="image/*" multiple>
+                        <div id="imagesPreview" class="mt-2" style="display: none;">
+                            <div id="imagesPreviewContainer" class="d-flex flex-wrap gap-2"></div>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="image_url" class="form-label">Image URL (if not uploading)</label>
-                        <input type="url" class="form-control" id="image_url" name="image_url">
+                        <label for="image_urls" class="form-label">Image URLs (comma-separated, if not uploading)</label>
+                        <input type="text" class="form-control" id="image_urls" name="image_urls" placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg">
                     </div>
                     <div class="mb-3">
                         <label for="github_url" class="form-label">GitHub URL</label>
@@ -144,15 +144,15 @@
                         <input type="text" class="form-control" id="edit_technologies" name="technologies" required>
                     </div>
                     <div class="mb-3">
-                        <label for="edit_image" class="form-label">Project Image</label>
-                        <input type="file" class="form-control" id="edit_image" name="image" accept="image/*">
-                        <div id="editImagePreview" class="mt-2">
-                            <img src="" alt="Preview" style="max-width: 200px; max-height: 200px;">
+                        <label for="edit_images" class="form-label">Project Images (Multiple)</label>
+                        <input type="file" class="form-control" id="edit_images" name="images" accept="image/*" multiple>
+                        <div id="editImagesPreview" class="mt-2">
+                            <div id="editImagesPreviewContainer" class="d-flex flex-wrap gap-2"></div>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="edit_image_url" class="form-label">Image URL (if not uploading)</label>
-                        <input type="url" class="form-control" id="edit_image_url" name="image_url">
+                        <label for="edit_image_urls" class="form-label">Image URLs (comma-separated, if not uploading)</label>
+                        <input type="text" class="form-control" id="edit_image_urls" name="image_urls" placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg">
                     </div>
                     <div class="mb-3">
                         <label for="edit_github_url" class="form-label">GitHub URL</label>
@@ -251,51 +251,72 @@ async function loadProjects() {
     }
 }
 
-// Add image preview functionality
-document.getElementById('image').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const preview = document.getElementById('imagePreview');
-            preview.style.display = 'block';
-            preview.querySelector('img').src = e.target.result;
-        }
-        reader.readAsDataURL(file);
+// Add multiple images preview functionality
+document.getElementById('images').addEventListener('change', function(e) {
+    const files = e.target.files;
+    const previewContainer = document.getElementById('imagesPreviewContainer');
+    const preview = document.getElementById('imagesPreview');
+
+    previewContainer.innerHTML = '';
+
+    if (files && files.length > 0) {
+        preview.style.display = 'block';
+        Array.from(files).forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.maxWidth = '100px';
+                img.style.maxHeight = '100px';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '4px';
+                img.style.margin = '2px';
+                previewContainer.appendChild(img);
+            }
+            reader.readAsDataURL(file);
+        });
+    } else {
+        preview.style.display = 'none';
     }
 });
 
 async function saveProject() {
     const form = document.getElementById('projectForm');
     const formData = new FormData(form);
-    const imageFile = formData.get('image');
+    const imageFiles = document.getElementById('images').files;
+    const imageUrlsInput = formData.get('image_urls');
 
     try {
-        let imageUrl = formData.get('image_url');
+        let imageUrls = [];
 
-        // If an image file is selected, upload it first
-        if (imageFile && imageFile.size > 0) {
+        // If image files are selected, upload them first
+        if (imageFiles && imageFiles.length > 0) {
             const uploadFormData = new FormData();
-            uploadFormData.append('file', imageFile);
-            
-            const uploadResponse = await fetch('/api/upload/image', {
+            Array.from(imageFiles).forEach(file => {
+                uploadFormData.append('files', file);
+            });
+
+            const uploadResponse = await fetch('/api/upload/images', {
                 method: 'POST',
                 body: uploadFormData
             });
-            
+
             if (!uploadResponse.ok) {
-                throw new Error('Failed to upload image');
+                throw new Error('Failed to upload images');
             }
-            
+
             const uploadResult = await uploadResponse.json();
-            imageUrl = uploadResult.url;
+            imageUrls = uploadResult.urls;
+        } else if (imageUrlsInput && imageUrlsInput.trim()) {
+            // Parse comma-separated URLs
+            imageUrls = imageUrlsInput.split(',').map(url => url.trim()).filter(url => url);
         }
 
         const project = {
             title: formData.get('title'),
             description: formData.get('description'),
             technologies: formData.get('technologies').split(',').map(t => t.trim()),
-            image_url: imageUrl,
+            image_urls: imageUrls,
             github_url: formData.get('github_url'),
             live_url: formData.get('live_url'),
             featured: formData.get('featured') === 'on'
@@ -317,7 +338,8 @@ async function saveProject() {
         const modal = bootstrap.Modal.getInstance(document.getElementById('addProjectModal'));
         modal.hide();
         form.reset();
-        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('imagesPreview').style.display = 'none';
+        document.getElementById('imagesPreviewContainer').innerHTML = '';
         loadProjects();
     } catch (error) {
         console.error('Error saving project:', error);
@@ -325,17 +347,32 @@ async function saveProject() {
     }
 }
 
-// Add image preview functionality for edit form
-document.getElementById('edit_image').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const preview = document.getElementById('editImagePreview');
-            preview.style.display = 'block';
-            preview.querySelector('img').src = e.target.result;
-        }
-        reader.readAsDataURL(file);
+// Add multiple images preview functionality for edit form
+document.getElementById('edit_images').addEventListener('change', function(e) {
+    const files = e.target.files;
+    const previewContainer = document.getElementById('editImagesPreviewContainer');
+    const preview = document.getElementById('editImagesPreview');
+
+    previewContainer.innerHTML = '';
+
+    if (files && files.length > 0) {
+        preview.style.display = 'block';
+        Array.from(files).forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.maxWidth = '100px';
+                img.style.maxHeight = '100px';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '4px';
+                img.style.margin = '2px';
+                previewContainer.appendChild(img);
+            }
+            reader.readAsDataURL(file);
+        });
+    } else {
+        preview.style.display = 'none';
     }
 });
 
@@ -343,23 +380,27 @@ async function editProject(id) {
     try {
         const response = await fetch(`/api/admin/projects/${id}`);
         const project = await response.json();
-        
+
         document.getElementById('edit_id').value = project.id;
         document.getElementById('edit_title').value = project.title;
         document.getElementById('edit_description').value = project.description;
         document.getElementById('edit_technologies').value = project.technologies.join(', ');
-        document.getElementById('edit_image_url').value = project.image_url || '';
+        document.getElementById('edit_image_urls').value = (project.image_urls || []).join(', ');
         document.getElementById('edit_github_url').value = project.github_url || '';
         document.getElementById('edit_live_url').value = project.live_url || '';
         document.getElementById('edit_featured').checked = project.featured;
 
-        // Show current image preview if exists
-        const preview = document.getElementById('editImagePreview');
-        if (project.image_url) {
+        // Show current images preview if exists
+        const preview = document.getElementById('editImagesPreview');
+        const previewContainer = document.getElementById('editImagesPreviewContainer');
+        if (project.image_urls && project.image_urls.length > 0) {
             preview.style.display = 'block';
-            preview.querySelector('img').src = project.image_url;
+            previewContainer.innerHTML = project.image_urls.map(url =>
+                `<img src="${url}" style="max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 4px; margin: 2px;">`
+            ).join('');
         } else {
             preview.style.display = 'none';
+            previewContainer.innerHTML = '';
         }
 
         const modal = new bootstrap.Modal(document.getElementById('editProjectModal'));
@@ -373,36 +414,42 @@ async function editProject(id) {
 async function updateProject() {
     const form = document.getElementById('editProjectForm');
     const formData = new FormData(form);
-    const imageFile = document.getElementById('edit_image').files[0];
+    const imageFiles = document.getElementById('edit_images').files;
     const projectId = formData.get('id');
+    const imageUrlsInput = formData.get('image_urls');
 
     try {
-        let imageUrl = formData.get('image_url');
+        let imageUrls = [];
 
-        // If an image file is selected, upload it first
-        if (imageFile) {
+        // If image files are selected, upload them first
+        if (imageFiles && imageFiles.length > 0) {
             const uploadFormData = new FormData();
-            uploadFormData.append('file', imageFile);
+            Array.from(imageFiles).forEach(file => {
+                uploadFormData.append('files', file);
+            });
             uploadFormData.append('project_id', projectId);
-            
-            const uploadResponse = await fetch('/api/upload/image', {
+
+            const uploadResponse = await fetch('/api/upload/images', {
                 method: 'POST',
                 body: uploadFormData
             });
-            
+
             if (!uploadResponse.ok) {
-                throw new Error('Failed to upload image');
+                throw new Error('Failed to upload images');
             }
-            
+
             const uploadResult = await uploadResponse.json();
-            imageUrl = uploadResult.url;
+            imageUrls = uploadResult.urls;
+        } else if (imageUrlsInput && imageUrlsInput.trim()) {
+            // Parse comma-separated URLs
+            imageUrls = imageUrlsInput.split(',').map(url => url.trim()).filter(url => url);
         }
 
         const project = {
             title: formData.get('title'),
             description: formData.get('description'),
             technologies: formData.get('technologies').split(',').map(t => t.trim()),
-            image_url: imageUrl,
+            image_urls: imageUrls,
             github_url: formData.get('github_url'),
             live_url: formData.get('live_url'),
             featured: formData.get('featured') === 'on'
@@ -424,7 +471,8 @@ async function updateProject() {
         const modal = bootstrap.Modal.getInstance(document.getElementById('editProjectModal'));
         modal.hide();
         form.reset();
-        document.getElementById('editImagePreview').style.display = 'none';
+        document.getElementById('editImagesPreview').style.display = 'none';
+        document.getElementById('editImagesPreviewContainer').innerHTML = '';
         loadProjects();
     } catch (error) {
         console.error('Error updating project:', error);
