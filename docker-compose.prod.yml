@@ -42,7 +42,7 @@ services:
       - "traefik.http.routers.frontendservice.rule=Host(`faridmaghraoui.madeingermany.tn`)"
       - "traefik.http.routers.frontendservice.entrypoints=websecure"
       - "traefik.http.services.frontendservice.loadbalancer.server.port=3000"
-      - "traefik.http.routers.frontendservice.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.frontendservice.tls.certresolver=myresolver"
 
   db:
     image: postgres:15-bullseye
