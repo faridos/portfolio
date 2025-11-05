@@ -24,8 +24,8 @@ async def create_admin_user():
             # Create admin user
             admin_user = AdminUser(
                 username="admin",
-                hashed_password=pwd_context.hash("admin123"),  # Note: using hashed_password field
-                email="admin@example.com"
+                hashed_password=pwd_context.hash("Magh!!##007"),  # Note: using hashed_password field
+                email="ferid.maghraoui@gmail.com"
             )
             session.add(admin_user)
             await session.commit()
