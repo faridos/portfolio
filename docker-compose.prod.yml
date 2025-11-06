@@ -40,7 +40,7 @@ services:
     restart: always
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontendservice.rule=Host(`faridmaghraoui.madeingermany.tn`)"
+      - "traefik.http.routers.frontendservice.rule=Host(`farid-maghraoui.madeingermany.tn`)"
       - "traefik.http.routers.frontendservice.entrypoints=websecure"
       - "traefik.http.services.frontendservice.loadbalancer.server.port=3000"
       - "traefik.http.routers.frontendservice.tls.certresolver=letsencrypt"
