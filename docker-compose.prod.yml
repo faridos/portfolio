@@ -35,6 +35,8 @@ services:
     environment:
       - REACT_APP_API_URL=${API_URL}
       - FRONTEND_DOMAIN=${FRONTEND_DOMAIN}
+    ports:
+      - "3000:3000"
     restart: always
     labels:
       - "traefik.enable=true"
