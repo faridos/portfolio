@@ -8,13 +8,13 @@ services:
       #ports:
       #- "8000:8000"
     environment:
-      - DATABASE_URL=postgresql+asyncpg://postgres:admin@db:5432/portfolio
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/portfolio
       - SECRET_KEY=${SECRET_KEY}
       - ALGORITHM=${ALGORITHM}
       - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}
-      - DB_PASSWORD=admin
-      - DB_USER=postgres 
-      - DB_HOST=db
+      # - DB_PASSWORD=postgres
+      # - DB_USER=postgres 
+      # - DB_HOST=db
       - BACKEND_DOMAIN=${BACKEND_DOMAIN}
     depends_on:
       - db
@@ -33,8 +33,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
-      # ports:
-            #  - "3000:3000"
+    env_file:
+      - .env
     environment:
       - REACT_APP_API_URL=${API_URL}
       - FRONTEND_DOMAIN=${FRONTEND_DOMAIN}
@@ -50,7 +50,7 @@ services:
     image: postgres:15-bullseye
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=admin
+      - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=portfolio
     volumes:
       - postgres_data:/var/lib/postgresql/data
