@@ -12,9 +12,6 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - ALGORITHM=${ALGORITHM}
       - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}
-      # - DB_PASSWORD=postgres
-      # - DB_USER=postgres 
-      # - DB_HOST=db
       - POSTGRES_PASSWORD=postgres
       - BACKEND_DOMAIN=${BACKEND_DOMAIN}
     depends_on:
@@ -24,11 +21,10 @@ services:
       - ./backend/app/static/uploads:/app/app/static/uploads
     labels:
       - "traefik.enable=true"
-      #apiportfolio.le-5ra.de BACKEND_DOMAIN
       - "traefik.http.routers.backendservice.rule=Host(`apiportfolio.madeingermany.tn`)"
       - "traefik.http.services.backendservice.loadbalancer.server.port=8000" # TODO check if this is needed
       - "traefik.http.routers.backendservice.entrypoints=websecure"
-      - "traefik.http.routers.backendservice.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.backendservice.tls.certresolver=myresolver"
 
   frontend:
     build:
