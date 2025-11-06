@@ -13,6 +13,10 @@ services:
       - ALGORITHM=${ALGORITHM}
       - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}
       - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=postgres 
+      - POSTGRES_DB=portfolio
+      - DB_HOST=db
+      - DB_PORT=5432
       - BACKEND_DOMAIN=${BACKEND_DOMAIN}
     depends_on:
       - db
