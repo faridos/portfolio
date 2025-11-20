@@ -12,4 +12,5 @@ fastapi-admin==1.0.3
 bcrypt==4.1.2
 gunicorn==21.2.0
 redis==5.0.1
-psycopg2-binary==2.9.9 
+psycopg2-binary==2.9.9
+starlette>=0.26.0
