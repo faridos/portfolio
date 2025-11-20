@@ -23,7 +23,6 @@ from .schemas.schemas import (
 )
 from .auth import authenticate_admin
 from .api import upload
-from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
 
 # Load environment variables
 load_dotenv()
@@ -54,7 +53,8 @@ origins = [
     "http://127.0.0.1:8000",
     "http://localhost:3001"
 ]
-app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+#app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
