@@ -92,7 +92,7 @@ const Home: React.FC = () => {
 
   const stats = [
     { icon: <CodeIcon />, value: projects?.length || 0, label: 'Projects', color: '#2196f3' },
-    { icon: <WorkIcon />, value: '5+', label: 'Years Experience', color: '#4caf50' },
+    { icon: <WorkIcon />, value: '8+', label: 'Years Experience', color: '#4caf50' },
     { icon: <StarIcon />, value: safePersonalData.skills.length, label: 'Skills', color: '#ff9800' },
     { icon: <TrendingUpIcon />, value: '100%', label: 'Passion', color: '#e91e63' },
   ];
@@ -104,8 +104,8 @@ const Home: React.FC = () => {
         <Fade in timeout={1000}>
           <Box
             sx={{
-              pt: isMobile ? 8 : 12,
-              pb: 8,
+              pt: isMobile ? 6 : 10,
+              pb: 4,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -161,6 +161,7 @@ const Home: React.FC = () => {
                 >
                   {safePersonalData.name}
                 </Typography>
+
                 <Typography
                   variant={isMobile ? "h5" : "h4"}
                   sx={{
@@ -172,6 +173,7 @@ const Home: React.FC = () => {
                 >
                   {safePersonalData.title}
                 </Typography>
+
                 <Typography
                   variant="body1"
                   sx={{
@@ -189,7 +191,7 @@ const Home: React.FC = () => {
             </Grow>
 
             {/* Stats Section */}
-            <Grid container spacing={3} sx={{ mt: 4, mb: 6, maxWidth: '800px' }}>
+            <Grid container spacing={3} sx={{ mt: 4, mb: 4, maxWidth: '800px' }}>
               {stats.map((stat, index) => (
                 <Grid item xs={6} md={3} key={stat.label}>
                   <Grow in={animatedElements.has(index + 2)} timeout={1000 + index * 200}>
@@ -225,7 +227,7 @@ const Home: React.FC = () => {
             </Grid>
 
             <Grow in={animatedElements.has(6)} timeout={1000}>
-              <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'center', mb: 8 }}>
+              <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'center', mb: 4 }}>
                 <Button
                   component={Link}
                   to="/contact"
@@ -284,10 +286,10 @@ const Home: React.FC = () => {
       </Container>
 
       {/* Featured Projects Section */}
-      <Box sx={{ background: 'white', py: 8 }}>
+      <Box id="featured-projects" sx={{ background: 'white', py: 6 }}>
         <Container maxWidth="lg">
           <Fade in={animatedElements.has(7)} timeout={1000}>
-            <Box sx={{ textAlign: 'center', mb: 6 }}>
+            <Box sx={{ textAlign: 'center', mb: 4 }}>
               <Typography
                 variant="h3"
                 component="h2"
