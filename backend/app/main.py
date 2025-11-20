@@ -53,7 +53,19 @@ origins = [
     "http://127.0.0.1:8000",
     "http://localhost:3001"
 ]
-#app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+#app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*") # does not exist anymore
+from starlette.middleware.base import BaseHTTPMiddleware
+# ...existing code...
+
+class ForwardedProtoMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        proto = request.headers.get("x-forwarded-proto")
+        if proto:
+            request.scope["scheme"] = proto.split(",")[0].strip()
+        return await call_next(request)
+
+# Trust Traefik X-Forwarded-* headers early
+app.add_middleware(ForwardedProtoMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
