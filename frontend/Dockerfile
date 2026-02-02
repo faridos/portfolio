@@ -11,11 +11,12 @@ RUN npm install --legacy-peer-deps
 # Copy your source code
 COPY . .
 
-# Set environment variable for React
+# Set environment variable for Next.js
 ENV CHOKIDAR_USEPOLLING=true
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Expose port
 EXPOSE 3000
 
-# Run React development server
-CMD ["npm", "start"]
+# Run Next.js development server
+CMD ["npm", "run", "dev"]
