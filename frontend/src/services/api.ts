@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { Project, Experience, PersonalData, Education } from '@/types';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://apiportfolio.madeingermany.tn';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://apiportfolio.madeingermany.tn';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -9,56 +10,28 @@ const api = axios.create({
   },
 });
 
-export interface Project {
-  id: number;
-  title: string;
-  description: string;
-  image_urls: string[];
-  technologies: string[];
-  github_url: string;
-  live_url: string;
-  featured: boolean;
-  created_at: string;
-  updated_at: string;
-}
+// Add auth header if credentials exist
+const getAuthHeader = () => {
+  if (typeof window !== 'undefined') {
+    const credentials = localStorage.getItem('admin_credentials');
+    if (credentials) {
+      const { username, password } = JSON.parse(credentials);
+      return {
+        Authorization: `Basic ${btoa(`${username}:${password}`)}`,
+      };
+    }
+  }
+  return {};
+};
 
-export interface Experience {
-  id: number;
-  company: string;
-  position: string;
-  location: string;
-  start_date: string;
-  end_date: string | null;
-  description: string;
-  current: boolean;
-}
+// Set auth header on each request
+api.interceptors.request.use((config) => {
+  const authHeader = getAuthHeader();
+  Object.assign(config.headers, authHeader);
+  return config;
+});
 
-export interface PersonalData {
-  name: string;
-  title: string;
-  bio: string;
-  summary: string;
-  email: string;
-  location: string;
-  avatar_url: string;
-  photo_url: string;
-  linkedin_url: string;
-  github_url: string;
-  skills: string[];
-}
-
-export interface Education {
-  id: number;
-  institution: string;
-  degree: string;
-  field: string;
-  location: string;
-  start_date: string;
-  end_date: string;
-  description: string;
-  achievements: string[];
-}
-
+// Public API calls (no auth required)
 export const getProjects = async (): Promise<Project[]> => {
   const response = await api.get('/api/projects');
   return response.data;
@@ -74,13 +47,8 @@ export const getExperiences = async (): Promise<Experience[]> => {
   return response.data;
 };
 
-export const getExperience = async (id: number): Promise<Experience> => {
-  const response = await api.get(`/api/experiences/${id}`);
-  return response.data;
-};
-
 export const getPersonalData = async (): Promise<PersonalData> => {
-  const response = await api.get('/api/personal');
+  const response = await api.get('/api/personal/first');
   return response.data;
 };
 
@@ -97,38 +65,7 @@ export const sendContactMessage = async (data: {
   await api.post('/api/contact', data);
 };
 
-export const uploadImage = async (file: File, projectId?: number): Promise<{ url: string }> => {
-  const formData = new FormData();
-  formData.append('file', file);
-  if (projectId) {
-    formData.append('project_id', projectId.toString());
-  }
-
-  const response = await api.post('/api/upload/image', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  return response.data;
-};
-
-export const uploadMultipleImages = async (files: File[], projectId?: number): Promise<{ urls: string[] }> => {
-  const formData = new FormData();
-  files.forEach((file, index) => {
-    formData.append('files', file);
-  });
-  if (projectId) {
-    formData.append('project_id', projectId.toString());
-  }
-
-  const response = await api.post('/api/upload/images', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  return response.data;
-};
-
+// Admin API calls (auth required)
 export const createProject = async (data: Partial<Project>): Promise<Project> => {
   const response = await api.post('/api/admin/projects', data);
   return response.data;
@@ -141,4 +78,84 @@ export const updateProject = async (id: number, data: Partial<Project>): Promise
 
 export const deleteProject = async (id: number): Promise<void> => {
   await api.delete(`/api/admin/projects/${id}`);
-}; 
+};
+
+export const createExperience = async (data: Partial<Experience>): Promise<Experience> => {
+  const response = await api.post('/api/admin/experiences', data);
+  return response.data;
+};
+
+export const updateExperience = async (id: number, data: Partial<Experience>): Promise<Experience> => {
+  const response = await api.put(`/api/admin/experiences/${id}`, data);
+  return response.data;
+};
+
+export const deleteExperience = async (id: number): Promise<void> => {
+  await api.delete(`/api/admin/experiences/${id}`);
+};
+
+export const updatePersonalData = async (data: Partial<PersonalData>): Promise<PersonalData> => {
+  const response = await api.put('/api/admin/personal/1', data);
+  return response.data;
+};
+
+export const uploadImage = async (file: File, projectId?: number): Promise<{ url: string }> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  if (projectId) {
+    formData.append('project_id', projectId.toString());
+  }
+
+  const response = await api.post('/api/upload/image', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      ...getAuthHeader(),
+    },
+  });
+  return response.data;
+};
+
+export const uploadMultipleImages = async (files: File[], projectId?: number): Promise<{ urls: string[] }> => {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append('files', file);
+  });
+  if (projectId) {
+    formData.append('project_id', projectId.toString());
+  }
+
+  const response = await api.post('/api/upload/images', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      ...getAuthHeader(),
+    },
+  });
+  return response.data;
+};
+
+// Auth utilities
+export const setAdminCredentials = (username: string, password: string) => {
+  localStorage.setItem('admin_credentials', JSON.stringify({ username, password }));
+};
+
+export const clearAdminCredentials = () => {
+  localStorage.removeItem('admin_credentials');
+};
+
+export const isAdminAuthenticated = (): boolean => {
+  if (typeof window !== 'undefined') {
+    return !!localStorage.getItem('admin_credentials');
+  }
+  return false;
+};
+
+// Verify credentials by making a test API call
+export const verifyAdminAuth = async (): Promise<boolean> => {
+  try {
+    await api.get('/api/admin/projects');
+    return true;
+  } catch {
+    clearAdminCredentials();
+    return false;
+  }
+};
