@@ -25,6 +25,13 @@ services:
       - "traefik.http.services.backendservice.loadbalancer.server.port=8000" # TODO check if this is needed
       - "traefik.http.routers.backendservice.entrypoints=websecure"
       - "traefik.http.routers.backendservice.tls.certresolver=letsencrypt"
+       # =========================
+    # ADMIN (frontend domain + /admin)
+    # =========================
+      - "traefik.http.routers.backend-admin.rule=Host(`farid-maghraoui.madeingermany.tn`) && PathPrefix(`/admin`)"
+      - "traefik.http.routers.backend-admin.entrypoints=websecure"
+      - "traefik.http.routers.backend-admin.tls.certresolver=letsencrypt"
+
 
   frontend:
     build:
@@ -38,9 +45,9 @@ services:
     ports:
       - "3000:3000"
     restart: always
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.frontendservice.rule=Host(`farid-maghraoui.madeingermany.tn`)"
+    labels: # except admin
+      - "traefik.enable=true" 
+      - "traefik.http.routers.frontendservice.rule=Host(`farid-maghraoui.madeingermany.tn`) && !PathPrefix(`/admin`)" 
       - "traefik.http.routers.frontendservice.entrypoints=websecure"
       - "traefik.http.services.frontendservice.loadbalancer.server.port=3000"
       - "traefik.http.routers.frontendservice.tls.certresolver=letsencrypt"
@@ -65,4 +72,3 @@ networks:
   default:
     external:
       name: traefik-proxy
- 
