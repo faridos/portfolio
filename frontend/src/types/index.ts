@@ -23,11 +23,13 @@ export interface Experience {
 }
 
 export interface PersonalData {
+  id?: number;
   name: string;
   title: string;
   bio: string;
   summary: string;
   email: string;
+  phone?: string;
   location: string;
   avatar_url: string;
   photo_url: string;
