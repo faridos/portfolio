@@ -33,7 +33,7 @@ services:
     env_file:
       - .env
     environment:
-      - REACT_APP_API_URL=https://apiportfolio.madeingermany.tn
+      - NEXT_PUBLIC_API_URL=https://apiportfolio.madeingermany.tn
       - FRONTEND_DOMAIN=https://farid-maghraoui.madeingermany.tn
     ports:
       - "3000:3000"
