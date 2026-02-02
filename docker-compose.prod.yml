@@ -28,7 +28,7 @@ services:
        # =========================
     # ADMIN (frontend domain + /admin)
     # =========================
-      - "traefik.http.routers.backend-admin.rule=Host(`farid-maghraoui.madeingermany.tn`) && PathPrefix(`/admin`)"
+      - "traefik.http.routers.backend-admin.rule=Host(`farid-maghraoui.madeingermany.tn`)"
       - "traefik.http.routers.backend-admin.entrypoints=websecure"
       - "traefik.http.routers.backend-admin.tls.certresolver=letsencrypt"
 
@@ -47,7 +47,7 @@ services:
     restart: always
     labels: # except admin
       - "traefik.enable=true" 
-      - "traefik.http.routers.frontendservice.rule=Host(`farid-maghraoui.madeingermany.tn`) && !PathPrefix(`/admin`)" 
+      - "traefik.http.routers.frontendservice.rule=Host(`farid-maghraoui.madeingermany.tn`)" 
       - "traefik.http.routers.frontendservice.entrypoints=websecure"
       - "traefik.http.services.frontendservice.loadbalancer.server.port=3000"
       - "traefik.http.routers.frontendservice.tls.certresolver=letsencrypt"
